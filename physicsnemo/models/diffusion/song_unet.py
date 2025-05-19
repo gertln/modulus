@@ -963,6 +963,19 @@ class SongUNetPosLtEmbd(SongUNet):
     checkpoint_level : int, optional
         Number of layers that should use gradient checkpointing (0 disables checkpointing).
         Higher values trade memory for computation. By default 0.
+    additive_pos_embed : bool, optional
+        If True, adds a learned positional embedding after the first convolution layer.
+        Used in StormCast model. By default False.
+    use_apex_gn : bool, optional
+        A boolean flag indicating whether we want to use Apex GroupNorm for NHWC layout.
+        Need to set this as False on cpu. Defaults to False.
+    act : str, optional
+        The activation function to use when fusing activation with GroupNorm. Defaults to None.
+    profile_mode:
+        A boolean flag indicating whether to enable all nvtx annotations during profiling.
+    amp_mode : bool, optional
+        A boolean flag indicating whether mixed-precision (AMP) training is enabled. Defaults to False.
+
 
     Note
     -----
@@ -1043,6 +1056,11 @@ class SongUNetPosLtEmbd(SongUNet):
         lead_time_steps: int = 9,
         prob_channels: List[int] = [],
         checkpoint_level: int = 0,
+        additive_pos_embed: bool = False,
+        use_apex_gn: bool = False,
+        act: str = "silu",
+        profile_mode: bool = False,
+        amp_mode: bool = False,
     ):
         super().__init__(
             img_resolution,
@@ -1063,6 +1081,11 @@ class SongUNetPosLtEmbd(SongUNet):
             decoder_type,
             resample_filter,
             checkpoint_level,
+            additive_pos_embed,
+            use_apex_gn,
+            act,
+            profile_mode,
+            amp_mode,
         )
 
         self.gridtype = gridtype
