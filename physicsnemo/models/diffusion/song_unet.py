@@ -1120,16 +1120,16 @@ class SongUNetPosLtEmbd(SongUNet):
         # Append positional and lead time embeddings to input conditioning
         embeds = []
         if self.pos_embd is not None:
-            embeds.append(self.pos_embd.to(x.device))
+            embeds.append(self.pos_embd.unsqueeze(0).repeat_interleave(x.shape[0],0,).to(x.device))
         if self.lt_embd is not None:
             embeds.append(
                 torch.reshape(
                     self.lt_embd[lead_time_label.int()],
-                    (self.lead_time_channels, self.img_shape_y, self.img_shape_x),
+                    (x.shape[0],self.lead_time_channels, self.img_shape_y, self.img_shape_x),
                 ).to(x.device)
             )
         if len(embeds) > 0:
-            embeds = torch.cat(embeds, dim=0)
+            embeds = torch.cat(embeds, dim=1)
             # Select embeddings using either selector function or global indices
             if embedding_selector is not None:
                 selected_pos_embd = self.positional_embedding_selector(
@@ -1215,7 +1215,7 @@ class SongUNetPosLtEmbd(SongUNet):
         """
         if global_index is None:
             return (
-                embeds.to(x.dtype).to(x.device)[None].expand((x.shape[0], -1, -1, -1))
+                embeds.to(x.dtype).to(x.device)
             )
 
         B = global_index.shape[0]
